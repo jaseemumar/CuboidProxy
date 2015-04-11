@@ -28,7 +28,7 @@ void MouseCallBackFunc(int event, int x, int y, int flags, void* userdata)
      if  ( event == EVENT_RBUTTONDOWN )
      {
         cout << "Right button of the mouse is clicked - position (" << x << ", " << y << ")" << endl;
-	Mask.data[Mask.cols*x+y]=1;
+	Mask.data[Mask.channels()*(Mask.cols*x+y)]=1;
      }
 }
 
@@ -42,6 +42,7 @@ int main( )
     setMouseCallback("OriginalImage",MouseCallBackFunc,NULL);
     Mask.rows=image.rows;
     Mask.cols=image.cols;
+    std::cout<<Mask.rows<<","<<Mask.cols;
     // define bounding rectangle 
     //cv::Rect rectangle(250,270,image.cols-250,image.rows-280);
     //while(status<2);
@@ -73,12 +74,18 @@ int main( )
     cv::namedWindow("Segmented Image");
     cv::imshow("Segmented Image",foreground);
     waitKey();
+    cv::imshow("Mask",Mask);
+
     cv::grabCut(image,    // input image
                     Mask,   // segmentation result
                             rectangle,// rectangle containing foreground 
                             bgModel,fgModel, // models
                             10,        // number of iterations
                             cv::GC_INIT_WITH_MASK); // use rectangle
+
+    // Get the pixels marked as likely foreground
+    cv::compare(Mask,cv::GC_PR_FGD,Mask,cv::CMP_EQ);
+    
      
     return 0;
 }
